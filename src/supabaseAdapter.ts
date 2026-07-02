@@ -1,6 +1,6 @@
 import type { SupabaseClient, Session } from '@supabase/supabase-js'
-import type { AuthAdapter } from './adapter'
-import type { EnderraSession, AuthResult, AuthStateSubscription } from './types'
+import type { AuthAdapter } from './adapter.js'
+import type { EnderraSession, AuthResult, AuthStateSubscription } from './types.js'
 
 function toEnderraSession(session: Session | null): EnderraSession | null {
   if (session === null) return null

@@ -1,3 +1,3 @@
-export * from './types'
-export * from './adapter'
-export { SupabaseAuthAdapter } from './supabaseAdapter'
+export * from './types.js'
+export * from './adapter.js'
+export { SupabaseAuthAdapter } from './supabaseAdapter.js'

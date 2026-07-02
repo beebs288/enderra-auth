@@ -1,6 +1,6 @@
 {
   "name": "@enderra/auth",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Enderra suite auth contract + provider adapters",
   "type": "module",
   "main": "dist/index.js",
@@ -13,7 +13,7 @@
   },
   "files": ["dist", "src"],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && node -e \"import('./dist/index.js').then(m => { if (!m.SupabaseAuthAdapter || !m.createEnderraAuth) process.exit(1) })\"",
     "prepare": "tsc -p tsconfig.json",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"

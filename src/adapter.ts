@@ -1,4 +1,4 @@
-import type { EnderraSession, AuthResult, AuthStateSubscription } from './types'
+import type { EnderraSession, AuthResult, AuthStateSubscription } from './types.js'
 
 export interface AuthAdapter {
   getSession(): Promise<EnderraSession | null>
