@@ -4,6 +4,7 @@ export interface AuthAdapter {
   getSession(): Promise<EnderraSession | null>
   onAuthStateChange(cb: (session: EnderraSession | null) => void): AuthStateSubscription
   signInWithPassword(email: string, password: string): Promise<AuthResult>
+  signUp(email: string, password: string): Promise<AuthResult>
   signOut(): Promise<AuthResult>
   sendPasswordReset(email: string): Promise<AuthResult>
   updatePassword(newPassword: string): Promise<AuthResult>

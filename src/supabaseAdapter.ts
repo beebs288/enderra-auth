@@ -28,6 +28,11 @@ export class SupabaseAuthAdapter implements AuthAdapter {
     return { error: error?.message ?? null }
   }
 
+  async signUp(email: string, password: string): Promise<AuthResult> {
+    const { error } = await this.client.auth.signUp({ email, password })
+    return { error: error?.message ?? null }
+  }
+
   async signOut(): Promise<AuthResult> {
     const { error } = await this.client.auth.signOut()
     return { error: error?.message ?? null }

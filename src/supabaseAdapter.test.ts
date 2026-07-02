@@ -55,6 +55,20 @@ describe('SupabaseAuthAdapter', () => {
     expect(await a.signInWithPassword('a@b.co', 'pw')).toEqual({ error: null })
   })
 
+  it('signUp forwards args and maps success to { error: null }', async () => {
+    const signUp = vi.fn().mockResolvedValue({ data: {}, error: null })
+    const a = new SupabaseAuthAdapter(fakeClient({ signUp }))
+    const res = await a.signUp('new@b.co', 'pw12345678')
+    expect(signUp).toHaveBeenCalledWith({ email: 'new@b.co', password: 'pw12345678' })
+    expect(res).toEqual({ error: null })
+  })
+
+  it('signUp maps a provider error to its message', async () => {
+    const signUp = vi.fn().mockResolvedValue({ data: {}, error: { message: 'User already registered' } })
+    const a = new SupabaseAuthAdapter(fakeClient({ signUp }))
+    expect(await a.signUp('dupe@b.co', 'pw12345678')).toEqual({ error: 'User already registered' })
+  })
+
   it('signOut, sendPasswordReset, updatePassword map through', async () => {
     const signOut = vi.fn().mockResolvedValue({ error: null })
     const resetPasswordForEmail = vi.fn().mockResolvedValue({ error: null })
