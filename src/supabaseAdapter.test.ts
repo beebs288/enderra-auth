@@ -15,7 +15,7 @@ describe('SupabaseAuthAdapter', () => {
     const a = new SupabaseAuthAdapter(fakeClient({
       getSession: vi.fn().mockResolvedValue({ data: { session: supaSession }, error: null }),
     }))
-    expect(await a.getSession()).toEqual({ user: { id: 'u1', email: 'a@b.co' }, accessToken: 'tok', providerToken: null })
+    expect(await a.getSession()).toEqual({ user: { id: 'u1', email: 'a@b.co', name: null, avatarUrl: null }, accessToken: 'tok', providerToken: null })
   })
 
   it('surfaces the Google provider_token on the mapped session', async () => {
@@ -26,10 +26,21 @@ describe('SupabaseAuthAdapter', () => {
       }),
     }))
     expect(await a.getSession()).toEqual({
-      user: { id: 'u1', email: 'a@b.co' },
+      user: { id: 'u1', email: 'a@b.co', name: null, avatarUrl: null },
       accessToken: 'tok',
       providerToken: 'ya29.drive-token',
     })
+  })
+
+  it('maps Google user_metadata (name/avatar) onto the user', async () => {
+    const a = new SupabaseAuthAdapter(fakeClient({
+      getSession: vi.fn().mockResolvedValue({
+        data: { session: { ...supaSession, user: { id: 'u1', email: 'a@b.co', user_metadata: { full_name: 'Ada L', picture: 'https://img/a.png' } } } },
+        error: null,
+      }),
+    }))
+    const s = await a.getSession()
+    expect(s?.user).toEqual({ id: 'u1', email: 'a@b.co', name: 'Ada L', avatarUrl: 'https://img/a.png' })
   })
 
   it('returns null when there is no session', async () => {
@@ -49,7 +60,7 @@ describe('SupabaseAuthAdapter', () => {
     const supaCb = onAuthStateChange.mock.calls[0][0] as (e: string, s: unknown) => void
     supaCb('SIGNED_IN', supaSession)
     supaCb('SIGNED_OUT', null)
-    expect(received).toEqual([{ user: { id: 'u1', email: 'a@b.co' }, accessToken: 'tok', providerToken: null }, null])
+    expect(received).toEqual([{ user: { id: 'u1', email: 'a@b.co', name: null, avatarUrl: null }, accessToken: 'tok', providerToken: null }, null])
     sub.unsubscribe()
     expect(unsubscribe).toHaveBeenCalledOnce()
   })

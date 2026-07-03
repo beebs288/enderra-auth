@@ -1,6 +1,10 @@
 export interface EnderraUser {
   id: string
   email: string | null
+  // Display fields from the identity provider (e.g. Google). Optional/null
+  // for password users, who have no provider profile.
+  name?: string | null
+  avatarUrl?: string | null
 }
 
 export interface EnderraSession {

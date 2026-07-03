@@ -4,8 +4,15 @@ import type { EnderraSession, AuthResult, AuthStateSubscription } from './types.
 
 function toEnderraSession(session: Session | null): EnderraSession | null {
   if (session === null) return null
+  const md = (session.user.user_metadata ?? {}) as Record<string, unknown>
+  const asStr = (v: unknown): string | null => (typeof v === 'string' ? v : null)
   return {
-    user: { id: session.user.id, email: session.user.email ?? null },
+    user: {
+      id: session.user.id,
+      email: session.user.email ?? null,
+      name: asStr(md.name) ?? asStr(md.full_name),
+      avatarUrl: asStr(md.avatar_url) ?? asStr(md.picture),
+    },
     accessToken: session.access_token,
     providerToken: session.provider_token ?? null,
   }

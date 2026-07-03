@@ -1,6 +1,6 @@
 {
   "name": "@enderra/auth",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Enderra suite auth contract + provider adapters",
   "type": "module",
   "main": "dist/index.js",
