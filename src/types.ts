@@ -6,6 +6,9 @@ export interface EnderraUser {
 export interface EnderraSession {
   user: EnderraUser
   accessToken: string
+  // Google (or other) OAuth provider access token, e.g. a Drive-scoped token.
+  // Optional/null for password sessions, which have no provider token.
+  providerToken?: string | null
 }
 
 export type AuthResult = { error: string | null }

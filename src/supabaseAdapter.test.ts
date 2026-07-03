@@ -15,7 +15,21 @@ describe('SupabaseAuthAdapter', () => {
     const a = new SupabaseAuthAdapter(fakeClient({
       getSession: vi.fn().mockResolvedValue({ data: { session: supaSession }, error: null }),
     }))
-    expect(await a.getSession()).toEqual({ user: { id: 'u1', email: 'a@b.co' }, accessToken: 'tok' })
+    expect(await a.getSession()).toEqual({ user: { id: 'u1', email: 'a@b.co' }, accessToken: 'tok', providerToken: null })
+  })
+
+  it('surfaces the Google provider_token on the mapped session', async () => {
+    const a = new SupabaseAuthAdapter(fakeClient({
+      getSession: vi.fn().mockResolvedValue({
+        data: { session: { ...supaSession, provider_token: 'ya29.drive-token' } },
+        error: null,
+      }),
+    }))
+    expect(await a.getSession()).toEqual({
+      user: { id: 'u1', email: 'a@b.co' },
+      accessToken: 'tok',
+      providerToken: 'ya29.drive-token',
+    })
   })
 
   it('returns null when there is no session', async () => {
@@ -35,7 +49,7 @@ describe('SupabaseAuthAdapter', () => {
     const supaCb = onAuthStateChange.mock.calls[0][0] as (e: string, s: unknown) => void
     supaCb('SIGNED_IN', supaSession)
     supaCb('SIGNED_OUT', null)
-    expect(received).toEqual([{ user: { id: 'u1', email: 'a@b.co' }, accessToken: 'tok' }, null])
+    expect(received).toEqual([{ user: { id: 'u1', email: 'a@b.co' }, accessToken: 'tok', providerToken: null }, null])
     sub.unsubscribe()
     expect(unsubscribe).toHaveBeenCalledOnce()
   })
@@ -53,6 +67,27 @@ describe('SupabaseAuthAdapter', () => {
       signInWithPassword: vi.fn().mockResolvedValue({ error: null }),
     }))
     expect(await a.signInWithPassword('a@b.co', 'pw')).toEqual({ error: null })
+  })
+
+  it('signInWithOAuth forwards provider + options + offline queryParams and maps success', async () => {
+    const signInWithOAuth = vi.fn().mockResolvedValue({ data: {}, error: null })
+    const a = new SupabaseAuthAdapter(fakeClient({ signInWithOAuth }))
+    const res = await a.signInWithOAuth('google', { scopes: 'email drive', redirectTo: 'https://app/x' })
+    expect(signInWithOAuth).toHaveBeenCalledWith({
+      provider: 'google',
+      options: {
+        scopes: 'email drive',
+        redirectTo: 'https://app/x',
+        queryParams: { access_type: 'offline', prompt: 'consent' },
+      },
+    })
+    expect(res).toEqual({ error: null })
+  })
+
+  it('signInWithOAuth maps a provider error to its message', async () => {
+    const signInWithOAuth = vi.fn().mockResolvedValue({ data: {}, error: { message: 'oauth blocked' } })
+    const a = new SupabaseAuthAdapter(fakeClient({ signInWithOAuth }))
+    expect(await a.signInWithOAuth('google')).toEqual({ error: 'oauth blocked' })
   })
 
   it('signUp forwards args and maps success to { error: null }', async () => {

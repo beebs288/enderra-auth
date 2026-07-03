@@ -7,6 +7,7 @@ function toEnderraSession(session: Session | null): EnderraSession | null {
   return {
     user: { id: session.user.id, email: session.user.email ?? null },
     accessToken: session.access_token,
+    providerToken: session.provider_token ?? null,
   }
 }
 
@@ -25,6 +26,23 @@ export class SupabaseAuthAdapter implements AuthAdapter {
 
   async signInWithPassword(email: string, password: string): Promise<AuthResult> {
     const { error } = await this.client.auth.signInWithPassword({ email, password })
+    return { error: error?.message ?? null }
+  }
+
+  async signInWithOAuth(
+    provider: 'google',
+    options?: { scopes?: string; redirectTo?: string },
+  ): Promise<AuthResult> {
+    const { error } = await this.client.auth.signInWithOAuth({
+      provider,
+      options: {
+        scopes: options?.scopes,
+        redirectTo: options?.redirectTo,
+        // access_type=offline + prompt=consent → Google returns a
+        // provider_refresh_token (needed for R2 silent Drive-token refresh).
+        queryParams: { access_type: 'offline', prompt: 'consent' },
+      },
+    })
     return { error: error?.message ?? null }
   }
 
