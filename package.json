@@ -1,6 +1,6 @@
 {
   "name": "@enderra/auth",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Enderra suite auth contract + provider adapters",
   "type": "module",
   "main": "dist/index.js",
@@ -10,6 +10,10 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./updates": {
+      "types": "./dist/updates/index.d.ts",
+      "default": "./dist/updates/index.js"
+    },
     "./plugin": "./plugin/withConnectTimeout.cjs"
   },
   "files": [
@@ -18,18 +22,28 @@
     "plugin/withConnectTimeout.cjs"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json && node -e \"import('./dist/index.js').then(m => { if (!m.SupabaseAuthAdapter || !m.createEnderraAuth) process.exit(1) })\"",
+    "build": "tsc -p tsconfig.json && node -e \"Promise.all([import('./dist/index.js'), import('./dist/updates/updater.js')]).then(([m, u]) => { if (!m.SupabaseAuthAdapter || !m.createEnderraAuth || !u.createUpdater) process.exit(1) })\"",
     "prepare": "tsc -p tsconfig.json",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "peerDependencies": {
-    "@supabase/supabase-js": "^2.108.0"
+    "@supabase/supabase-js": "^2.108.0",
+    "react": ">=18"
   },
   "devDependencies": {
     "@supabase/supabase-js": "^2.108.2",
+    "@types/react": "^19.3.0",
     "typescript": "~5.6.0",
     "vitest": "^4.1.8"
   },
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "peerDependenciesMeta": {
+    "@supabase/supabase-js": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  }
 }
